@@ -1,0 +1,46 @@
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using System;
+using System.IO;
+using System.Diagnostics;
+
+namespace buildinfo.Editor
+{
+    public class BuildMetadataGenerator : IPreprocessBuildWithReport
+    {
+        public int callbackOrder => 0;
+
+        public void OnPreprocessBuild(BuildReport _)
+        {
+            string buildTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC");
+
+            // Try to get the latest Git commit hash or message
+            string gitInfo = "Unavailable";
+            try
+            {
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "git",
+                        Arguments = "log -1 --pretty=format:\"%h - %s\"",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                process.Start();
+                gitInfo = process.StandardOutput.ReadToEnd().Trim();
+                process.WaitForExit();
+            }
+            catch
+            {
+            }
+
+            string metadata = $"Build Time: {buildTime}\nGit: {gitInfo}";
+
+            File.WriteAllText("Assets/Resources/build_info.txt", metadata);
+            UnityEngine.Debug.Log("Build metadata generated:\n" + metadata);
+        }
+    }
+}
