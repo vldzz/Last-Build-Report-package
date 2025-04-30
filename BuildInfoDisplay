@@ -1,0 +1,22 @@
+using UnityEngine;
+
+namespace buildinfo
+{
+    public class BuildInfoDisplay : MonoBehaviour
+    {
+        public TMPro.TMP_Text uiText;
+
+        void Start()
+        {
+            TextAsset buildInfo = Resources.Load<TextAsset>("build_info");
+            if (buildInfo != null)
+            {
+                uiText.text = buildInfo.text;
+            }
+            else
+            {
+                uiText.text = "Build info not found.";
+            }
+        }
+    }
+}
